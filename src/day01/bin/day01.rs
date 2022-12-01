@@ -10,5 +10,5 @@ fn main() {
     println!("Result: {}", part1::part1(_input));
 
     println!("--- Part Two ---");
-    println!("Result: {}", part2::part2());
+    println!("Result: {}", part2::part2(_input));
 }
