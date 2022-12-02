@@ -1,14 +1,21 @@
 //! # Advent of Code - Day 1
 
-mod part1;
-mod part2;
-
 fn main() {
     let _input = include_str!("../input.txt");
 
+    let mut calories = _input
+        .split("\n\n")
+        .map(|elf_calories| { elf_calories.split("\n")
+            .filter(|x| !x.is_empty())
+            .map(|x| x.parse::<u32>().unwrap())
+            .sum() })
+        .collect::<Vec<u32>>();
+
+    calories.sort();
+
     println!("--- Part One ---");
-    println!("Result: {}", part1::part1(_input));
+    println!("Result: {}", calories.last().unwrap());
 
     println!("--- Part Two ---");
-    println!("Result: {}", part2::part2(_input));
+    println!("Result: {}", calories.iter().take(3).sum::<u32>());
 }
