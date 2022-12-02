@@ -5,8 +5,7 @@ fn main() {
 
     let mut calories = _input
         .split("\n\n")
-        .map(|elf_calories| { elf_calories.split("\n")
-            .filter(|x| !x.is_empty())
+        .map(|elf_calories| { elf_calories.lines()
             .map(|x| x.parse::<u32>().unwrap())
             .sum() })
         .collect::<Vec<u32>>();
