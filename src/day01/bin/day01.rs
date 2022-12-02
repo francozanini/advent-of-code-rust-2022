@@ -16,5 +16,5 @@ fn main() {
     println!("Result: {}", calories.last().unwrap());
 
     println!("--- Part Two ---");
-    println!("Result: {}", calories.iter().take(3).sum::<u32>());
+    println!("Result: {}", calories.iter().rev().take(3).sum::<u32>());
 }
