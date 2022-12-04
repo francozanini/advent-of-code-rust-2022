@@ -11,21 +11,20 @@ fn intersection(first: &str, second: &str) -> String {
         .collect::<String>();
 }
 
-fn item_value(item: char) -> usize {
+fn item_value(item: String) -> usize {
     let alphabet = String::from_utf8((b'a'..=b'z').chain(b'A'..=b'Z').collect()).unwrap();
-    return alphabet.chars().position(|char| char == item).unwrap() + 1;
+    return alphabet
+        .chars()
+        .position(|char| char.to_string() == item)
+        .unwrap()
+        + 1;
 }
 
 fn part1(input: &str) -> usize {
     return input
         .lines()
         .map(|line| line.split_at(line.len() / 2))
-        .map(|(first_half, second_half)| {
-            intersection(first_half, second_half)
-                .chars()
-                .last()
-                .unwrap()
-        })
+        .map(|(first_half, second_half)| intersection(first_half, second_half))
         .map(|item| item_value(item))
         .sum();
 }
@@ -36,7 +35,7 @@ fn part2(input: &str) -> usize {
         .collect::<Vec<&str>>()
         .chunks(3)
         .map(|chunk| intersection(intersection(chunk[0], chunk[1]).as_str(), chunk[2]))
-        .map(|item| item_value(item.chars().last().unwrap()))
+        .map(|item| item_value(item))
         .sum();
 }
 
