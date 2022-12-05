@@ -1,7 +1,5 @@
 //! # Advent of Code - Day 5
-
 use std::collections::VecDeque;
-use std::iter::{Enumerate, Filter, Map};
 
 fn transpose(v: Vec<Vec<&str>>) -> Vec<Vec<&str>> {
     return (0..v.iter().map(|row| row.len()).max().unwrap())
@@ -43,8 +41,9 @@ fn print_result(final_state: Vec<VecDeque<String>>) -> Vec<String> {
 }
 
 fn run_instructions(
-    initial_state: Vec<VecDeque<String>>,
-    instructions: Vec<&str>,
+    initial_state: &Vec<VecDeque<String>>,
+    instructions: &Vec<&str>,
+    how_to_pick_crates: impl Fn(&Vec<String>) -> Vec<String>,
 ) -> Vec<VecDeque<String>> {
     let mut state = initial_state.clone();
 
@@ -69,11 +68,11 @@ fn run_instructions(
             }
         }
 
-        for item in to_move {
+        for item in how_to_pick_crates(&to_move) {
             state
                 .get_mut(parsed_instruction[2] - 1)
                 .unwrap()
-                .push_front(item)
+                .push_front(item.clone())
         }
     }
 
@@ -95,11 +94,14 @@ fn main() {
     let max = state.iter().map(|row| row.len()).max().unwrap() + 1;
     let instructions = find_instructions(_input, max);
 
-    let result_one = run_instructions(state, instructions);
+    let result_one = run_instructions(&state, &instructions, |identity| identity.clone());
+    let result_two = run_instructions(&state, &instructions, |to_rev| {
+        to_rev.iter().rev().map(|item| item.clone()).collect()
+    });
 
     println!("--- Part One ---");
     println!("Result: {:?}", print_result(result_one));
 
     println!("--- Part Two ---");
-    println!("Result: {}", "");
+    println!("Result: {:?}", print_result(result_two));
 }
