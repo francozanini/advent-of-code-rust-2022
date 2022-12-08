@@ -3,7 +3,6 @@ use std::str::FromStr;
 
 #[derive(Debug)]
 struct Dir {
-    parent: Option<Box<Dir>>,
     name: String,
     files: Vec<File>,
     sub_dirs: Vec<Dir>,
@@ -12,7 +11,6 @@ struct Dir {
 impl Dir {
     fn new(name: &str) -> Self {
         return Dir {
-            parent: None,
             name: name.to_string(),
             files: Vec::new(),
             sub_dirs: Vec::new(),
@@ -51,14 +49,12 @@ impl Dir {
     fn size_of_dirs(&self) -> Vec<usize> {
         let own_size = self.size();
 
-        let dirs_size = self
+        return self
             .sub_dirs
             .iter()
-            .flat_map(|sub_dir| sub_dir.size_of_dirs());
-
-        let mut all_sizes: Vec<usize> = dirs_size.collect();
-        all_sizes.push(own_size);
-        return all_sizes;
+            .flat_map(|sub_dir| sub_dir.size_of_dirs())
+            .chain(vec![own_size].into_iter())
+            .collect();
     }
 
     fn sum_size_of_dirs_lower_than(&self) -> usize {
@@ -104,10 +100,6 @@ impl FromStr for Dir {
     }
 }
 
-trait Node {
-    fn size(&self) -> usize;
-}
-
 #[derive(Debug)]
 struct File {
     name: String,
@@ -121,9 +113,7 @@ impl File {
             size,
         };
     }
-}
 
-impl Node for File {
     fn size(&self) -> usize {
         return self.size;
     }
