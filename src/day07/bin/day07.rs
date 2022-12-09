@@ -1,5 +1,6 @@
 use std::rc::Rc;
 use std::str::FromStr;
+use std::{i64, isize};
 
 #[derive(Debug)]
 struct Dir {
@@ -57,11 +58,23 @@ impl Dir {
             .collect();
     }
 
-    fn sum_size_of_dirs_lower_than(&self) -> usize {
+    fn sum_size_of_dirs_lower_than_one_hundred_k(&self) -> usize {
         self.size_of_dirs()
             .iter()
             .filter(|size| **size < 100000)
             .sum()
+    }
+
+    fn size_of_dir_to_delete_for_update(&self) -> i64 {
+        let size_of_dirs = self.size_of_dirs();
+        let size_of_dirs_iter = size_of_dirs.iter().map(|size| *size as i64);
+        let free_space = 70000000 - self.size() as i64;
+        let space_needed = 30000000 - free_space;
+        return size_of_dirs_iter
+            .filter(|size| size >= &&space_needed)
+            .inspect(|size| println!("{}", size))
+            .min()
+            .expect("to find at least one dir with enough size");
     }
 }
 
@@ -69,29 +82,37 @@ impl FromStr for Dir {
     type Err = ();
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        let mut current_dir: &str = "";
-        Ok(s.lines().fold(Dir::new("/"), |mut dir, line| {
+        let mut current_dir: String = "/".to_string();
+        Ok(s.lines().skip(1).fold(Dir::new("/"), |mut dir, line| {
             return match line.split_once(" ").unwrap() {
                 ("$", command) => {
                     if command.starts_with("cd") {
-                        current_dir = command
-                            .split_whitespace()
-                            .last()
-                            .expect("to not be an empty line");
+                        current_dir = match command.split_once(" ").unwrap() {
+                            (_, "..") => current_dir.rsplit_once("/").unwrap().0.to_string(),
+                            (_, to_append) => {
+                                let slash_or_space =
+                                    if current_dir.ends_with("/") { "" } else { "/" };
+                                current_dir.clone() + slash_or_space + to_append
+                            }
+                        };
                     }
                     dir
                 }
                 ("dir", dir_name) => {
-                    dir.add_dir(current_dir, dir_name);
+                    let slash_or_space = if current_dir.ends_with("/") { "" } else { "/" };
+                    dir.add_dir(
+                        current_dir.as_str(),
+                        (current_dir.clone() + slash_or_space + dir_name).as_str(),
+                    );
                     dir
                 }
                 (file_size, file_name) => {
                     dir.add_file(
-                        current_dir,
+                        current_dir.as_str(),
                         file_name,
                         file_size
                             .parse::<usize>()
-                            .expect("first argument to be usize"),
+                            .expect("first argument to be a num"),
                     );
                     dir
                 }
@@ -113,10 +134,6 @@ impl File {
             size,
         };
     }
-
-    fn size(&self) -> usize {
-        return self.size;
-    }
 }
 
 fn main() {
@@ -135,9 +152,30 @@ mod test {
     use std::fs;
 
     #[test]
-    fn test_example_case() {
+    fn part_one_example() {
         let file = fs::read_to_string("./src/day07/input.test.txt").expect("file to exist");
         let root = file.parse::<Dir>().expect("root dir to be parseable");
-        assert_eq!(root.sum_size_of_dirs_lower_than(), 95437);
+        assert_eq!(root.sum_size_of_dirs_lower_than_one_hundred_k(), 95437);
+    }
+
+    #[test]
+    fn part_one_prod() {
+        let file = fs::read_to_string("./src/day07/input.txt").expect("file to exist");
+        let root = file.parse::<Dir>().expect("root dir to be parseable");
+        assert_eq!(root.sum_size_of_dirs_lower_than_one_hundred_k(), 1348005);
+    }
+
+    #[test]
+    fn part_two_example() {
+        let file = fs::read_to_string("./src/day07/input.test.txt").expect("file to exist");
+        let root = file.parse::<Dir>().expect("root dir to be parseable");
+        assert_eq!(root.size_of_dir_to_delete_for_update(), 24933642);
+    }
+
+    #[test]
+    fn part_two_prod() {
+        let file = fs::read_to_string("./src/day07/input.txt").expect("file to exist");
+        let root = file.parse::<Dir>().expect("root dir to be parseable");
+        assert_eq!(root.size_of_dir_to_delete_for_update(), 12785886);
     }
 }
