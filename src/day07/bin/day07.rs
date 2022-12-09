@@ -150,6 +150,7 @@ fn main() {
 mod test {
     use crate::Dir;
     use std::fs;
+    use std::time::Instant;
 
     #[test]
     fn part_one_example() {
@@ -177,5 +178,25 @@ mod test {
         let file = fs::read_to_string("./src/day07/input.txt").expect("file to exist");
         let root = file.parse::<Dir>().expect("root dir to be parseable");
         assert_eq!(root.size_of_dir_to_delete_for_update(), 12785886);
+    }
+
+    #[test]
+    fn bigboy() {
+        let file = fs::read_to_string("./src/day07/bigboy.txt").expect("file to exist");
+        let now = Instant::now();
+        let root = file.parse::<Dir>().expect("root dir to be parseable");
+        println!("Parsing solved after {} seconds", now.elapsed().as_secs());
+        let first_answer = root.sum_size_of_dirs_lower_than_one_hundred_k();
+        println!(
+            "First problem solved after {} seconds",
+            now.elapsed().as_secs()
+        );
+        let second_answer = root.size_of_dir_to_delete_for_update();
+        println!(
+            "Second problem solved after {} seconds",
+            now.elapsed().as_secs()
+        );
+        assert_eq!(first_answer, 2414990429);
+        assert_eq!(second_answer, 170301725);
     }
 }
